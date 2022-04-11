@@ -122,6 +122,7 @@ dataCollector.join()
 displayupdater.join()
 
 # cerramos el programa completo en caso de que cerrar sea 1
+#Estos es una prueba
 while True:
     if getcerrar() == 1:
         sys.exit()
