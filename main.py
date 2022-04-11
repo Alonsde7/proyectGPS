@@ -3,7 +3,6 @@ import pygame as pygame
 import serial
 import threading
 import utm
-import math
 
 # Huso para la conversión
 HusoHorario = 30
@@ -85,9 +84,6 @@ def update_line():
     pxmax = 446326.69
     pymin = 4470560.11
     pymax = 4470973.64
-    print("RESTAS")
-    print(pymax - pymin)
-    print(pxmax - pxmin)
     rpy = 1294 / (pymax - pymin)
     rpx = 632 / (pxmax - pxmin)
 
@@ -109,15 +105,9 @@ def update_line():
                 sys.exit()
         pantalla.blit(imagen, (0, 0))
         data = getdata()
-        data[0] = 446359
-        data[1] = 4470965
-        '''MIRAR ESTA PARTE'''
         # dibujar punto en la imagen, dependiendo de la resolucion de la imagen, y la distancia de los extremos
-        # hay que restar o multiplicar por valores distintos
-        print("x = " + str(rpx * (data[0]-pxmin)))
-        print("y = " + str(rpy * (pymax-data[1])))
-        print(pymax-data[1])
-        print(rpy)
+        #print("x = " + str(rpx * (data[0]-pxmin)))
+        #print("y = " + str(rpy * (pymax-data[1])))
         pygame.draw.circle(imagen, color, (rpx * (data[0]-pxmin), rpy * (pymax-data[1])), 10, 0)
         # actualizar display
         pygame.display.update()
@@ -125,12 +115,12 @@ def update_line():
 
 # Configuramos y lanzamos los hilo encargado de leer datos del serial y de actualizar pantalla
 
-# dataCollector = threading.Thread(target=GetData, args=())
+dataCollector = threading.Thread(target=GetData, args=())
 displayupdater = threading.Thread(target=update_line, args=())
-# dataCollector.start()
+dataCollector.start()
 displayupdater.start()
 
-# dataCollector.join()
+dataCollector.join()
 displayupdater.join()
 
 # cerramos el programa completo en caso de que cerrar sea 1
