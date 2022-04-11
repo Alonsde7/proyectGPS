@@ -3,6 +3,7 @@ import pygame as pygame
 import serial
 import threading
 import utm
+import math
 
 # Huso para la conversión
 HusoHorario = 30
@@ -78,10 +79,20 @@ def GetData():
 
 def update_line():
     color = (0, 255, 0)  # Color con el que dibujamos la linea
-    imagen = pygame.image.load("/home/alvaro/imagenGPS.jpg")  # Imagen de la pantalla,
+    imagen = pygame.image.load("/home/alvaro/imagenGPSINSIA.jpg")  # Imagen de la pantalla,
+
+    pxmin = 446119.19
+    pxmax = 446326.69
+    pymin = 4470560.11
+    pymax = 4470973.64
+    print("RESTAS")
+    print(pymax - pymin)
+    print(pxmax - pxmin)
+    rpy = 1294 / (pymax - pymin)
+    rpx = 632 / (pxmax - pxmin)
 
     # abrir display con el tamaño de la imagen, escalado
-    pantalla = pygame.display.set_mode((1024, 768))
+    pantalla = pygame.display.set_mode((1294, 632))
     # nombre de la pantalla
     pygame.display.set_caption("GPS! ETSISI G4")
     # Cargar imagen en el display
@@ -96,29 +107,30 @@ def update_line():
                 setcerrar(1)
                 pygame.display.quit()
                 sys.exit()
-        datoantiguo = [0, 0]
+        pantalla.blit(imagen, (0, 0))
         data = getdata()
-        if data != datoantiguo:  # para no actualizar la pantalla de más, comprobamos si está en distinto sitio
-            pantalla.blit(imagen, (0, 0))
-            '''MIRAR ESTA PARTE'''
-            # dibujar punto en la imagen, dependiendo de la resolucion de la imagen, y la distancia de los extremos
-            # hay que restar o multiplicar por valores distintos
-            print("x" + str(1.13 * (-446782 + data[1])))
-            print("y" + str(1.8 * (-4470862 + data[0])))
-            pygame.draw.circle(imagen, color, ((-1.13 * (-446782 + data[1])), (1.8 * (-4470862 + data[0]))), 5, 0)
-            # actualizar display
-            pygame.display.update()
-        datoantiguo = data
+        data[0] = 446359
+        data[1] = 4470965
+        '''MIRAR ESTA PARTE'''
+        # dibujar punto en la imagen, dependiendo de la resolucion de la imagen, y la distancia de los extremos
+        # hay que restar o multiplicar por valores distintos
+        print("x = " + str(rpx * (data[0]-pxmin)))
+        print("y = " + str(rpy * (pymax-data[1])))
+        print(pymax-data[1])
+        print(rpy)
+        pygame.draw.circle(imagen, color, (rpx * (data[0]-pxmin), rpy * (pymax-data[1])), 10, 0)
+        # actualizar display
+        pygame.display.update()
 
 
 # Configuramos y lanzamos los hilo encargado de leer datos del serial y de actualizar pantalla
 
-dataCollector = threading.Thread(target=GetData, args=())
+# dataCollector = threading.Thread(target=GetData, args=())
 displayupdater = threading.Thread(target=update_line, args=())
-dataCollector.start()
+# dataCollector.start()
 displayupdater.start()
 
-dataCollector.join()
+# dataCollector.join()
 displayupdater.join()
 
 # cerramos el programa completo en caso de que cerrar sea 1
