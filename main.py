@@ -108,7 +108,7 @@ def update_line():
         # dibujar punto en la imagen, dependiendo de la resolucion de la imagen, y la distancia de los extremos
         #print("x = " + str(rpx * (data[0]-pxmin)))
         #print("y = " + str(rpy * (pymax-data[1])))
-        pygame.draw.circle(imagen, color, (rpx * (data[0]-pxmin), rpy * (pymax-data[1])), 10, 0)
+        pygame.draw.circle(imagen, color, (rpx * (data[0]-pxmin), rpy * (pymax-data[1])), 5, 0)
         # actualizar display
         pygame.display.update()
 
