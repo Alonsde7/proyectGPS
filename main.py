@@ -55,7 +55,7 @@ def GetData():
         while True:
             if ser.inWaiting():
                 line = str(ser.readline())
-                # Si la línea tiene 'GPGGA' la parseamos y extraemos el valor
+                # Si la línea tiene 'GPGGA' la parseamos y extraemos el
                 if line.split(',')[0] == "b'$GPGGA" and line.split(',')[6] != '0':
                     splitline = line.split(',')[2:6]
 
@@ -67,7 +67,10 @@ def GetData():
                     y = aux[0]
                     x = aux[1]
                     res = [x, y]
+                    #print("hola")
+                    #print(res)
                     setdata(res)
+
                 # hay que cerrar cada thread si queremos salir ademas de cerrar los puertos
                 if getcerrar() == 1:
                     ser.close()
@@ -105,10 +108,13 @@ def update_line():
                 sys.exit()
         pantalla.blit(imagen, (0, 0))
         data = getdata()
+        #print(data)
+        #el 0 es el norte
+        #el 1 es con el E
         # dibujar punto en la imagen, dependiendo de la resolucion de la imagen, y la distancia de los extremos
         #print("x = " + str(rpx * (data[0]-pxmin)))
         #print("y = " + str(rpy * (pymax-data[1])))
-        pygame.draw.circle(imagen, color, (rpx * (data[0]-pxmin), rpy * (pymax-data[1])), 5, 0)
+        pygame.draw.circle(imagen, color, (rpx * (data[1]-pxmin), rpy * (pymax-data[0])), 5, 0)
         # actualizar display
         pygame.display.update()
 
