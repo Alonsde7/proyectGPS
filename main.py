@@ -13,6 +13,10 @@ gData = [0, 0]
 cerrado = 0
 
 
+def ObtenerLimite(x: float, y: float, sentido: chr):
+    return 0
+
+
 # Para usar correctamente las variables gloabales, usamos estas dos funciones, como solo la funcion que lee escribe,
 # no hay region critica
 def setcerrar(dato):
@@ -62,19 +66,19 @@ def GetData():
                 if line.split(',')[0] == "b'$GPGGA" and line.split(',')[6] != '0':
                     splitline = line.split(',')[2:6]
 
-                    # Conversion de grados a utm
+                    # ----- Conversion de grados a UTM ----- #
                     aux = utm.from_latlon(
                         cambiarsigno(fullgrade(float(splitline[0][0:2]), float(splitline[0][2::])), splitline[1]),
                         cambiarsigno(fullgrade(float(splitline[2][0:3]), float(splitline[2][3::])), splitline[3]),
                         HusoHorario, 'T')
 
-                    # -----Obtener la hora con decimales de la trama que manda el GPS ----- #
+                    # ----- Obtener la hora con decimales de la trama que manda el GPS ----- #
                     hh = line.split(',')[1][0:2]
                     mm = line.split(',')[1][2:4]
                     ss = line.split(',')[1][4::]
                     hora = int(hh) + int(mm) / 60 + float(ss) / 1200
 
-                    # -----Diferencia de posicioón respecto de la anterior ----- #
+                    # ----- Diferencia de posicioón respecto de la anterior ----- #
                     x = aux[0]  # valor nuevo
                     y = aux[1]  # valor nuevo
 
@@ -86,7 +90,7 @@ def GetData():
                     res = [x, y, velocidad]
                     setdata(res)
 
-                # hay que cerrar cada thread si queremos salir ademas de cerrar los puertos
+                # ----- hay que cerrar cada thread si queremos salir ademas de cerrar los puertos ----- #
                 if getcerrar() == 1:
                     ser.close()
                     sys.exit()
@@ -121,6 +125,7 @@ def update_line():
                 setcerrar(1)
                 pygame.display.quit()
                 sys.exit()
+
         pantalla.blit(imagen, (0, 0))
         data = getdata()
         # print(data)
