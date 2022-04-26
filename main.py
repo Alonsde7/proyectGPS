@@ -1,3 +1,4 @@
+import math
 import sys
 import pygame as pygame
 import serial
@@ -52,6 +53,8 @@ def GetData():
     # puerto serial
     with serial.Serial('/dev/ttyUSB0', 4800, timeout=1, parity=serial.PARITY_NONE, rtscts=1) as ser:
         ser.flush()
+        # -----INICIALIZACIÓN----- #
+        x, y, hora_antigua = 0, 0, 0
         while True:
             if ser.inWaiting():
                 line = str(ser.readline())
@@ -64,11 +67,23 @@ def GetData():
                         cambiarsigno(fullgrade(float(splitline[0][0:2]), float(splitline[0][2::])), splitline[1]),
                         cambiarsigno(fullgrade(float(splitline[2][0:3]), float(splitline[2][3::])), splitline[3]),
                         HusoHorario, 'T')
-                    y = aux[0]
-                    x = aux[1]
-                    res = [x, y]
-                    #print("hola")
-                    #print(res)
+
+                    # -----Obtener la hora con decimales de la trama que manda el GPS ----- #
+                    hh = line.split(',')[1][0:2]
+                    mm = line.split(',')[1][2:4]
+                    ss = line.split(',')[1][4::]
+                    hora = int(hh) + int(mm) / 60 + float(ss) / 1200
+                    print(hora)
+                    # -----Diferencia de posicioón respecto de la anterior ----- #
+                    x = aux[0]  # valor nuevo
+                    y = aux[1]  # valor nuevo
+
+                    distancia = math.sqrt(math.pow(res[0] - x, 2) + math.pow(res[1] - y, 2)) / 100
+                    velocidad = distancia / abs(hora - hora_antigua)
+
+                    # ----- pasar la velocidad a medidas estandarizadas (no como en EEUU :P)----- #
+                    hora_antigua = hora
+                    res = [x, y, velocidad]
                     setdata(res)
 
                 # hay que cerrar cada thread si queremos salir ademas de cerrar los puertos
@@ -108,13 +123,11 @@ def update_line():
                 sys.exit()
         pantalla.blit(imagen, (0, 0))
         data = getdata()
-        #print(data)
-        #el 0 es el norte
-        #el 1 es con el E
+        # print(data)
+        # el 0 es el norte
+        # el 1 es con el E
         # dibujar punto en la imagen, dependiendo de la resolucion de la imagen, y la distancia de los extremos
-        #print("x = " + str(rpx * (data[0]-pxmin)))
-        #print("y = " + str(rpy * (pymax-data[1])))
-        pygame.draw.circle(imagen, color, (rpx * (data[1]-pxmin), rpy * (pymax-data[0])), 5, 0)
+        pygame.draw.circle(imagen, color, (rpx * (data[0] - pxmin), rpy * (pymax - data[1])), 5, 0)
         # actualizar display
         pygame.display.update()
 
