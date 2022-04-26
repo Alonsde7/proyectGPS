@@ -73,12 +73,12 @@ def GetData():
                     mm = line.split(',')[1][2:4]
                     ss = line.split(',')[1][4::]
                     hora = int(hh) + int(mm) / 60 + float(ss) / 1200
-                    print(hora)
+
                     # -----Diferencia de posicioón respecto de la anterior ----- #
                     x = aux[0]  # valor nuevo
                     y = aux[1]  # valor nuevo
 
-                    distancia = math.sqrt(math.pow(res[0] - x, 2) + math.pow(res[1] - y, 2)) / 100
+                    distancia = math.sqrt(math.pow(res[0] - x, 2) + math.pow(res[1] - y, 2)) / 1000
                     velocidad = distancia / abs(hora - hora_antigua)
 
                     # ----- pasar la velocidad a medidas estandarizadas (no como en EEUU :P)----- #
