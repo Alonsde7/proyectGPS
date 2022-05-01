@@ -177,19 +177,19 @@ def ObtenerLimite(x: float, y: float, sentido: chr):
             # print(data)
             # el 0 es el norte
             # el 1 es con el E
-            # dibujar punto en la imagen, dependiendo de la resolucion de la imagen, y la distancia de los extremos
+            # dibujar punto en la imagen, dependiendo de la resolucion de la imagen,´y la distancia de los extremos
             pygame.draw.circle(imagen, color, (rpx * (data[0] - pxmin), rpy * (pymax - data[1])), 5, 0)
             # actualizar display
             pygame.display.update()
 
     # Configuramos y lanzamos los hilo encargado de leer datos del serial y de actualizar pantalla
 
-    dataCollector = threading.Thread(target=GetData, args=())
+    data_collector = threading.Thread(target=GetData, args=())
     displayupdater = threading.Thread(target=update_line, args=())
-    dataCollector.start()
+    data_collector.start()
     displayupdater.start()
 
-    dataCollector.join()
+    data_collector.join()
     displayupdater.join()
 
     # cerramos el programa completo en caso de que cerrar sea 1
