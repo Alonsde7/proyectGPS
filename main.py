@@ -5,6 +5,10 @@ import serial
 import threading
 import utm
 
+'''
+FALTA INDICAR LA DIRECCION
+'''
+
 # Huso para la conversión
 HusoHorario = 30
 
@@ -14,7 +18,6 @@ cerrado = 0
 
 
 def ObtenerLimite(x: float, y: float, sentido: chr):
-    limite = 0
     if x <= 446321.7377:
         if y <= 4470885.003:
             if y <= 4470838.737:
@@ -115,8 +118,12 @@ def ObtenerLimite(x: float, y: float, sentido: chr):
                         velocidad = distancia / abs(hora - hora_antigua)
 
                         # ----- pasar la velocidad a medidas estandarizadas (no como en EEUU :P)----- #
+                        if res[0] < x:
+                            sentido = 'N'
+                        else:
+                            sentido = 'S'
                         hora_antigua = hora
-                        res = [x, y, velocidad]
+                        res = [x, y, velocidad, sentido]
                         setdata(res)
 
                     # ----- hay que cerrar cada thread si queremos salir ademas de cerrar los puertos ----- #
@@ -172,7 +179,8 @@ def ObtenerLimite(x: float, y: float, sentido: chr):
             pantalla.blit(txt, txtrect)
             pantalla.blit(txt2, txtrect2)
 
-            txt = font.render('Velocidad límite: ' + str(25) + ' Km/h', True, (0, 255, 0))
+            txt = font.render('Velocidad límite: ' + str(ObtenerLimite(data[0], data[1], data[3])) + ' Km/h', True,
+                              (0, 255, 0))
             txt2 = font.render('Velocidad: ' + str(data[2]) + ' Km/h', True, (0, 0, 0))
             # print(data)
             # el 0 es el norte
