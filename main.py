@@ -5,9 +5,6 @@ import serial
 import threading
 import utm
 
-'''
-FALTA INDICAR LA DIRECCION
-'''
 
 # Huso para la conversión
 HusoHorario = 30
