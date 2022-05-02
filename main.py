@@ -13,6 +13,17 @@ gData = [0, 0, 0, 'N']
 cerrado = 0
 
 
+def ColorVelocidad(velocidad: float, limite: float):
+    if velocidad > limite * 1.1:
+        color = (255, 0, 0)
+    elif velocidad < limite * 0.9:
+        color = (0, 255, 0)
+    else:
+        color = (255, 255, 0)
+
+    return color
+
+
 def ObtenerLimite(x: float, y: float, sentido: chr):
     if x <= 446321.7377:
         if y <= 4470885.003:
@@ -141,7 +152,6 @@ def GetData():
 
 def update_line():
     pygame.init()
-    color = (0, 255, 0)  # Color con el que dibujamos la linea
     imagen = pygame.image.load("/home/alvaro/imagenGPSINSIA.jpg")  # Imagen de la pantalla,
 
     pxmin = 446119.19
@@ -180,18 +190,24 @@ def update_line():
                 sys.exit()
 
         pantalla.blit(imagen, (0, 0))
+        # Obtener Datos
         data = getdata()
+
+        # Obtener Color
+        color = ColorVelocidad(data[2], ObtenerLimite(data[0], data[1], data[3]))
+
+        # Actualizar textos
+        txt = font.render('Velocidad límite: ' + str(ObtenerLimite(data[0], data[1], data[3])) + ' Km/h', True,
+                          color)
+        txt2 = font.render('Velocidad: ' + "{:.2f}".format(data[2]) + ' Km/h', True, color)
 
         pantalla.blit(txt, txtrect)
         pantalla.blit(txt2, txtrect2)
 
-        txt = font.render('Velocidad límite: ' + str(ObtenerLimite(data[0], data[1], data[3])) + ' Km/h', True,
-                          (0, 255, 0))
-        txt2 = font.render('Velocidad: ' + "{:.2f}".format(data[2]) + ' Km/h', True, (0, 0, 0))
-        # print(data)
+        print(data)
         # el 0 es el norte
         # el 1 es con el E
-        # dibujar punto en la imagen, dependiendo de la resolucion de la imagen,´y la distancia de los extremos
+        # dibujar punto en la imagen, dependiendo de la resolución de la imagen y la distancia de los extremos
         pygame.draw.circle(imagen, color, (rpx * (data[0] - pxmin), rpy * (pymax - data[1])), 5, 0)
         # actualizar display
         pygame.display.update()
