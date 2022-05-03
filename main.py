@@ -123,7 +123,7 @@ def GetData():
                     hh = line.split(',')[1][0:2]
                     mm = line.split(',')[1][2:4]
                     ss = line.split(',')[1][4::]
-                    hora = int(hh) + int(mm) / 60 + float(ss) / 1200
+                    hora = int(hh) + int(mm) / 60 + float(ss) / 3600
 
                     # ----- Diferencia de posicioón respecto de la anterior ----- #
                     x = aux[0]  # valor nuevo
