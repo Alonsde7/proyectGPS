@@ -4,6 +4,8 @@ import pygame as pygame
 import serial
 import threading
 import utm
+import requests
+import io
 
 # Huso para la conversión
 HusoHorario = 30
@@ -11,6 +13,14 @@ HusoHorario = 30
 # Variables globales
 gData = [0, 0, 0, 'N']
 cerrado = 0
+
+
+def ObtenerImgaen(pxcentro: float, pycentro: float):
+    url = 'https://dev.virtualearth.net/REST/v1/Imagery/Map/Road/40.386,-3.6319?mapSize=1294,' \
+          '632&zoomlevel=17&key=AjWZ4tM-gHmcfGv99DGtfGRuY_iikb1yEwpc6TVvsVq83d6VySdVlEqF-GIoWYD5'
+    response = requests.get(url)
+    imagefile = io.BytesIO(response.content)
+    return pygame.image.load(imagefile)
 
 
 def ColorVelocidad(velocidad: float, limite: float):
