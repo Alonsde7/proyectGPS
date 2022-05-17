@@ -15,12 +15,14 @@ gData = [0, 0, 0, 'N']
 cerrado = 0
 
 
-def ObtenerImgaen(pxcentro: float, pycentro: float):
-    url = 'https://dev.virtualearth.net/REST/v1/Imagery/Map/Road/40.386,-3.6319?mapSize=1294,' \
-          '632&zoomlevel=17&key=AjWZ4tM-gHmcfGv99DGtfGRuY_iikb1yEwpc6TVvsVq83d6VySdVlEqF-GIoWYD5'
+def ObtenerImgaen(pxcentro: float, pycentro: float):  # el pycntro se da en utm
+    pxcentrograde, pycentrograde = utm.to_latlon(pxcentro, pycentro, 30, 'T')
+    url = 'https://dev.virtualearth.net/REST/v1/Imagery/Map/Road/' + str(pxcentrograde) + ',' + str(
+        pycentrograde) + '?mapSize=1294,632&zoomlevel=18&key=AjWZ4tM-gHmcfGv99DGtfGRuY_iikb1yEwpc6TVvsVq83d6VySdVlEqF-GIoWYD5'
     response = requests.get(url)
     imagefile = io.BytesIO(response.content)
     return pygame.image.load(imagefile)
+
 
 
 def ColorVelocidad(velocidad: float, limite: float):
