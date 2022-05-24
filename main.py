@@ -43,6 +43,7 @@ def ObtenerImagen(pxcentro: float, pycentro: float):  # el pycntro se da en utm
     response = requests.get(url)
     imagefile = io.BytesIO(response.content)
     imagen = pygame.image.load(imagefile)
+    # Actualizar variable de control
     esperallamada = 0
 
 
