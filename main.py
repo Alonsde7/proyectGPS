@@ -24,7 +24,7 @@ def IsINSIA(px, py):
     return resultado
 
 
-def ObtenerImgaen(pxcentro: float, pycentro: float):  # el pycntro se da en utm
+def ObtenerImagen(pxcentro: float, pycentro: float):  # el pycntro se da en utm
     # |---------------------------------------------------------------------------------------|
     # |----------------------------  VARIABLES  ----------------------------------------------|
     global imagen, pxmin, pxmax, pymin, pymax, rp, esperallamada
@@ -204,7 +204,7 @@ def update_line():
 
     # --------UNA VEZ TENGAMOS UNA SEÑAL INICIAL, MOSTRAMOS POR PANTALLAS CON NUESTRA POSICIÓN COMO PUNTO CENTRAL-------
 
-    ObtenerImgaen(data[0], data[1])
+    ObtenerImagen(data[0], data[1])
 
     posicion_inicial_x = data[0]
     posicion_inicial_y = data[1]
@@ -250,20 +250,20 @@ def update_line():
 
         if pxmax - 40 < data[0] and esperallamada == 0:
             esperallamada = 1
-            threading.Thread(target=ObtenerImgaen(posicion_inicial_x + 80, posicion_inicial_y))
+            threading.Thread(target=ObtenerImagen(posicion_inicial_x + 80, posicion_inicial_y))
             posicion_inicial_x = posicion_inicial_x + 80
         elif pxmin + 40 > data[0] and esperallamada == 0:
             esperallamada = 1
-            threading.Thread(target=ObtenerImgaen(posicion_inicial_x - 80, posicion_inicial_y))
+            threading.Thread(target=ObtenerImagen(posicion_inicial_x - 80, posicion_inicial_y))
             posicion_inicial_x = posicion_inicial_x - 80
 
         if pymax - 40 < data[1] and esperallamada == 0:
             esperallamada = 1
-            threading.Thread(target=ObtenerImgaen(posicion_inicial_x, posicion_inicial_y + 80))
+            threading.Thread(target=ObtenerImagen(posicion_inicial_x, posicion_inicial_y + 80))
             posicion_inicial_y = posicion_inicial_y + 80
         elif pymin + 40 > data[1] and esperallamada == 0:
             esperallamada = 1
-            threading.Thread(target=ObtenerImgaen(posicion_inicial_x, posicion_inicial_y - 80))
+            threading.Thread(target=ObtenerImagen(posicion_inicial_x, posicion_inicial_y - 80))
             posicion_inicial_y = posicion_inicial_y - 80
 
         # hay que llamar a la api pero con la posicion y inicial y x aumentarla
