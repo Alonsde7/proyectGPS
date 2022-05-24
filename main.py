@@ -6,13 +6,11 @@ import threading
 import utm
 import requests
 import io
-
-# Huso para la conversión
 from pygame.time import delay
 
+# Huso para la conversión
 HusoHorario = 30
 
-# Variables globales
 gData = [0, 0, 0, 'N']
 cerrado = 0
 
@@ -65,24 +63,24 @@ def ObtenerLimite(x: float, y: float, sentido: chr):
             if y <= 4470838.737:
                 limite = 15
             else:
-                if sentido == 'N':
+                if sentido == 'O':
                     limite = 18
                 else:
                     limite = 20
         else:
-            if sentido == 'N':
+            if sentido == 'O':
                 limite = 18
             else:
                 limite = 20
     else:
         if y <= 4470969.447:
-            if sentido == 'N' or x > 446339.3589:
+            if sentido == 'O' or x > 446339.3589:
                 limite = 5
             else:
                 limite = 20
         else:
             if y <= 4470974.363:
-                if sentido == 'N':
+                if sentido == 'O':
                     if x <= 446349.552 or y <= 4470970.938:
                         limite = 5
                     else:
@@ -169,9 +167,9 @@ def GetData():
 
                     # ----- pasar la velocidad a medidas estandarizadas (no como en EEUU :P)    ----- #
                     if res[0] < x:
-                        sentido = 'N'
+                        sentido = 'O'
                     else:
-                        sentido = 'S'
+                        sentido = 'E'
                     hora_antigua = hora
                     res = [x, y, velocidad, sentido]
                     setdata(res)
@@ -200,7 +198,6 @@ def update_line():
     while data[0] == 0 and data[1] == 0:
         print("Buscando señal")
         data = getdata()
-        # print(data)
         delay(100)
 
     # --------UNA VEZ TENGAMOS UNA SEÑAL INICIAL, MOSTRAMOS POR PANTALLAS CON NUESTRA POSICIÓN COMO PUNTO CENTRAL-------
@@ -267,12 +264,7 @@ def update_line():
             threading.Thread(target=ObtenerImagen(posicion_inicial_x, posicion_inicial_y - 80))
             posicion_inicial_y = posicion_inicial_y - 80
 
-        # hay que llamar a la api pero con la posicion y inicial y x aumentarla
-
-        # Obtener Color
-
         # Actualizar textos, en caso de estar en el INSIA se muestra la velocidad límite en caso contrario
-
         if IsINSIA(data[0], data[1]):
             color = ColorVelocidad(data[2], ObtenerLimite(data[0], data[1], data[3]))
             txt = font.render('Velocidad límite: ' + str(ObtenerLimite(data[0], data[1], data[3])) + ' Km/h', True,
@@ -293,7 +285,7 @@ def update_line():
         pygame.display.update()
 
 
-# Configuramos y lanzamos los hilo encargado de leer datos del serial y de actualizar pantalla
+# Configuramos y lanzamos los hilos encargado de leer datos del serial y de actualizar pantalla
 
 data_collector = threading.Thread(target=GetData, args=())
 displayupdater = threading.Thread(target=update_line, args=())
