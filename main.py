@@ -8,6 +8,8 @@ import requests
 import io
 
 # Huso para la conversión
+from pygame.time import delay
+
 HusoHorario = 30
 
 # Variables globales
@@ -15,14 +17,33 @@ gData = [0, 0, 0, 'N']
 cerrado = 0
 
 
+def IsINSIA(px, py):
+    resultado = False
+    if 446187 < px < 446373 and 4470749 < py < 4471018:
+        resultado = True
+    return resultado
+
+
 def ObtenerImgaen(pxcentro: float, pycentro: float):  # el pycntro se da en utm
+    # |---------------------------------------------------------------------------------------|
+    # |----------------------------  VARIABLES  ----------------------------------------------|
+    global imagen, pxmin, pxmax, pymin, pymax, rp, ok
+    rp = abs(156543.04 * math.cos(utm.to_latlon(pxcentro, pycentro, 30, 'T')[1]) / math.pow(2, 19))
+
+    pxmin = pxcentro - (1294 * rp / 2)  # Cambiar según la imagen
+    pxmax = pxcentro + (1294 * rp / 2)  # Cambiar según la imagen
+    pymin = pycentro - (632 * rp / 2)  # Cambiar según la imagen
+    pymax = pycentro + (632 * rp / 2)  # Cambiar según la imagen
+
+    # --------------------------Llamada al endpoint de la API-----------------------------------------------------
     pxcentrograde, pycentrograde = utm.to_latlon(pxcentro, pycentro, 30, 'T')
-    url = 'https://dev.virtualearth.net/REST/v1/Imagery/Map/Road/' + str(pxcentrograde) + ',' + str(
-        pycentrograde) + '?mapSize=1294,632&zoomlevel=18&key=AjWZ4tM-gHmcfGv99DGtfGRuY_iikb1yEwpc6TVvsVq83d6VySdVlEqF-GIoWYD5'
+    url = 'https://dev.virtualearth.net/REST/v1/Imagery/Map/Aerial/' + str(pxcentrograde) + ',' + str(
+        pycentrograde) + '?mapSize=1294,632&zoomlevel=19&key=AjWZ4tM-gHmcfGv99DGtfGRuY_iikb1yEwpc6TVvsVq83d6VySdVlEqF' \
+                         '-GIoWYD5 '
     response = requests.get(url)
     imagefile = io.BytesIO(response.content)
-    return pygame.image.load(imagefile)
-
+    imagen = pygame.image.load(imagefile)
+    ok = 0
 
 
 def ColorVelocidad(velocidad: float, limite: float):
@@ -37,6 +58,7 @@ def ColorVelocidad(velocidad: float, limite: float):
 
 
 def ObtenerLimite(x: float, y: float, sentido: chr):
+    # ---------------------ELIGE LA VELOCIDAD LIMITE DEL INSIA SEGÚN UN ÁRBOL BINARIO HECHO CON C4.8-------------
     if x <= 446321.7377:
         if y <= 4470885.003:
             if y <= 4470838.737:
@@ -115,7 +137,7 @@ def GetData():
     # puerto serial
     with serial.Serial('/dev/ttyUSB0', 4800, timeout=1, parity=serial.PARITY_NONE, rtscts=1) as ser:
         ser.flush()
-        # -----INICIALIZACIÓN----- #
+        # ----- INICIALIZACIÓN   -------------   VARIABLES   ----- #
         x, y, hora_antigua = 0, 0, 0
         res = 0, 0, 0, 'N'
         while True:
@@ -144,17 +166,16 @@ def GetData():
                     distancia = math.sqrt(math.pow(res[0] - x, 2) + math.pow(res[1] - y, 2)) / 1000
                     velocidad = distancia / abs(hora - hora_antigua)
 
-                    # ----- pasar la velocidad a medidas estandarizadas (no como en EEUU :P)----- #
+                    # ----- pasar la velocidad a medidas estandarizadas (no como en EEUU :P)    ----- #
                     if res[0] < x:
                         sentido = 'N'
                     else:
                         sentido = 'S'
                     hora_antigua = hora
                     res = [x, y, velocidad, sentido]
-                    print(res)
                     setdata(res)
 
-                # ----- hay que cerrar cada thread si queremos salir ademas de cerrar los puertos ----- #
+                # ----- hay que cerrar cada thread si queremos salir además de cerrar los puertos ----- #
                 if getcerrar() == 1:
                     ser.close()
                     sys.exit()
@@ -163,22 +184,40 @@ def GetData():
 # Función que actualizará los datos de la imágen en un hilo distinto
 
 def update_line():
-    pygame.init()
-    imagen = pygame.image.load("/home/alvaro/imagenGPSINSIA.jpg")  # Imagen de la pantalla,
+    # |---------------------------------------------------------------------------------------|
+    # |----------------------------  VARIABLES  ----------------------------------------------|
 
-    pxmin = 446119.19
-    pxmax = 446326.69
-    pymin = 4470560.11
-    pymax = 4470973.64
-    rpy = 1294 / (pymax - pymin)
-    rpx = 632 / (pxmax - pxmin)
+    global imagen, pxmin, pxmax, pymin, pymax, rp, ok
+
+    ok = 0
+
+    # --------------------  INICIALIZACIÓN  ----------------------
+
+    pygame.init()
+    data = getdata()
+    # PARA NO LLAMAR A LA API, HASTA QUE NOS DEN UNA POSICIÓN DISTINTA DE 0,0 (INICIALIZACIÓN) EN UTM, NO MOSTRAMOS NADA
+    while data[0] == 0 and data[1] == 0:
+        print("Buscando señal")
+        data = getdata()
+        # print(data)
+        delay(100)
+
+    # --------UNA VEZ TENGAMOS UNA SEÑAL INICIAL, MOSTRAMOS POR PANTALLAS CON NUESTRA POSICIÓN COMO PUNTO CENTRAL-------
+
+    ObtenerImgaen(data[0], data[1])
+
+    posicion_inicial_x = data[0]
+    posicion_inicial_y = data[1]
 
     # abrir display con el tamaño de la imagen, escalado
     pantalla = pygame.display.set_mode((1294, 632))
+
     # nombre de la pantalla
     pygame.display.set_caption("GPS! ETSISI G4")
+
     # Cargar imagen en el display
     pygame.display.update()
+
     # inicialización de los textos
     font = pygame.font.Font('freesansbold.ttf', 32)
 
@@ -202,25 +241,53 @@ def update_line():
                 sys.exit()
 
         pantalla.blit(imagen, (0, 0))
+
         # Obtener Datos
         data = getdata()
 
-        # Obtener Color
-        color = ColorVelocidad(data[2], ObtenerLimite(data[0], data[1], data[3]))
+        # Condicional de carga de mapa en caso de que estemos en el límite de este. Para una mayor comprensión de la
+        # posición de la posición que nos encontramos se mueve según unas coordenadas iniciales
 
-        # Actualizar textos
-        txt = font.render('Velocidad límite: ' + str(ObtenerLimite(data[0], data[1], data[3])) + ' Km/h', True,
-                          color)
+        if pxmax - 40 < data[0] and ok == 0:
+            ok = 1
+            threading.Thread(target=ObtenerImgaen(posicion_inicial_x + 80, posicion_inicial_y))
+            posicion_inicial_x = posicion_inicial_x + 80
+        elif pxmin + 40 > data[0] and ok == 0:
+            ok = 1
+            threading.Thread(target=ObtenerImgaen(posicion_inicial_x - 80, posicion_inicial_y))
+            posicion_inicial_x = posicion_inicial_x - 80
+
+        if pymax - 40 < data[1] and ok == 0:
+            ok = 1
+            threading.Thread(target=ObtenerImgaen(posicion_inicial_x, posicion_inicial_y + 80))
+            posicion_inicial_y = posicion_inicial_y + 80
+        elif pymin + 40 > data[1] and ok == 0:
+            ok = 1
+            threading.Thread(target=ObtenerImgaen(posicion_inicial_x, posicion_inicial_y - 80))
+            posicion_inicial_y = posicion_inicial_y - 80
+
+        # hay que llamar a la api pero con la posicion y inicial y x aumentarla
+
+        # Obtener Color
+
+        # Actualizar textos, en caso de estar en el INSIA se muestra la velocidad límite en caso contrario
+
+        if IsINSIA(data[0], data[1]):
+            color = ColorVelocidad(data[2], ObtenerLimite(data[0], data[1], data[3]))
+            txt = font.render('Velocidad límite: ' + str(ObtenerLimite(data[0], data[1], data[3])) + ' Km/h', True,
+                              color)
+            pantalla.blit(txt, txtrect)
+        else:
+            color = (0, 0, 0)
+
         txt2 = font.render('Velocidad: ' + "{:.2f}".format(data[2]) + ' Km/h', True, color)
 
-        pantalla.blit(txt, txtrect)
         pantalla.blit(txt2, txtrect2)
 
-        print(data)
-        # el 0 es el norte
-        # el 1 es con el E
+        # el 0 es la longitud
+        # el 1 es la latitud
         # dibujar punto en la imagen, dependiendo de la resolución de la imagen y la distancia de los extremos
-        pygame.draw.circle(imagen, color, (rpx * (data[0] - pxmin), rpy * (pymax - data[1])), 5, 0)
+        pygame.draw.circle(imagen, color, ((data[0] - pxmin) / rp, (pymax - data[1]) / rp), 5, 0)
         # actualizar display
         pygame.display.update()
 
