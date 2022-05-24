@@ -27,7 +27,7 @@ def IsINSIA(px, py):
 def ObtenerImgaen(pxcentro: float, pycentro: float):  # el pycntro se da en utm
     # |---------------------------------------------------------------------------------------|
     # |----------------------------  VARIABLES  ----------------------------------------------|
-    global imagen, pxmin, pxmax, pymin, pymax, rp, ok
+    global imagen, pxmin, pxmax, pymin, pymax, rp, esperallamada
     rp = abs(156543.04 * math.cos(utm.to_latlon(pxcentro, pycentro, 30, 'T')[1]) / math.pow(2, 19))
 
     pxmin = pxcentro - (1294 * rp / 2)  # Cambiar según la imagen
@@ -43,7 +43,7 @@ def ObtenerImgaen(pxcentro: float, pycentro: float):  # el pycntro se da en utm
     response = requests.get(url)
     imagefile = io.BytesIO(response.content)
     imagen = pygame.image.load(imagefile)
-    ok = 0
+    esperallamada = 0
 
 
 def ColorVelocidad(velocidad: float, limite: float):
@@ -187,9 +187,9 @@ def update_line():
     # |---------------------------------------------------------------------------------------|
     # |----------------------------  VARIABLES  ----------------------------------------------|
 
-    global imagen, pxmin, pxmax, pymin, pymax, rp, ok
+    global imagen, pxmin, pxmax, pymin, pymax, rp, esperallamada
 
-    ok = 0
+    esperallamada = 0
 
     # --------------------  INICIALIZACIÓN  ----------------------
 
@@ -248,21 +248,21 @@ def update_line():
         # Condicional de carga de mapa en caso de que estemos en el límite de este. Para una mayor comprensión de la
         # posición de la posición que nos encontramos se mueve según unas coordenadas iniciales
 
-        if pxmax - 40 < data[0] and ok == 0:
-            ok = 1
+        if pxmax - 40 < data[0] and esperallamada == 0:
+            esperallamada = 1
             threading.Thread(target=ObtenerImgaen(posicion_inicial_x + 80, posicion_inicial_y))
             posicion_inicial_x = posicion_inicial_x + 80
-        elif pxmin + 40 > data[0] and ok == 0:
-            ok = 1
+        elif pxmin + 40 > data[0] and esperallamada == 0:
+            esperallamada = 1
             threading.Thread(target=ObtenerImgaen(posicion_inicial_x - 80, posicion_inicial_y))
             posicion_inicial_x = posicion_inicial_x - 80
 
-        if pymax - 40 < data[1] and ok == 0:
-            ok = 1
+        if pymax - 40 < data[1] and esperallamada == 0:
+            esperallamada = 1
             threading.Thread(target=ObtenerImgaen(posicion_inicial_x, posicion_inicial_y + 80))
             posicion_inicial_y = posicion_inicial_y + 80
-        elif pymin + 40 > data[1] and ok == 0:
-            ok = 1
+        elif pymin + 40 > data[1] and esperallamada == 0:
+            esperallamada = 1
             threading.Thread(target=ObtenerImgaen(posicion_inicial_x, posicion_inicial_y - 80))
             posicion_inicial_y = posicion_inicial_y - 80
 
